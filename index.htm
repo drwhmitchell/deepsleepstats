@@ -8,7 +8,7 @@
     <meta name="author" content="">
  <!---   <link rel="icon" href="/docs/4.0/assets/img/favicons/favicon.ico">   -->
 
-    <title>BookLnk</title>
+    <title>DeepSleep Stats</title>
 
     <link rel="canonical" href="https://getbootstrap.com/docs/4.0/examples/starter-template/">
 
@@ -42,40 +42,53 @@
           <li class="nav-item">
             <a class="nav-link" href="#">Configure</a>
           </li>
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="http://example.com" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Data Views</a>
-            <div class="dropdown-menu" aria-labelledby="dropdown01">
-              <a class="dropdown-item" href="#">Weekly</a>
-              <a class="dropdown-item" href="#">Monthly</a>
-              <a class="dropdown-item" href="#">All-Time</a>
-            </div>
-          </li>
+          
         </ul>
 
       </div>
     </nav>
 
+
+
     <main role="main" class="container">
 
       <div class="starter-template">
         <h1>DeepSleep App Site Stats</h1>
-        <p class="lead">Updated 5-7-22</p>
+        <p class="lead">Updated 5/8/22</p>
       </div>
       <div>
+
+
         
-        <h4>Signup Summary</h4>
+        <h4>New Signup Summary</h4>
         <div id="signup_activity">
+          <div class="btn-group btn-group-sm" role="group" aria-label="Basic example">
+            <button type="button" class="btn0 btn-outline-primary">Week</button>
+            <button type="button" class="btn0 btn-outline-primary active">Month</button>
+            <button type="button" class="btn0 btn-outline-primary">Year</button>
+          </div>
           <canvas id='timeSeriesChart1' width='200' height='100'></canvas>
         </div>
-      </div>
+
+        </div>
         <br>
         <h4>User Sync Activity</h4>
         <div id="users_synced">
-          <canvas id='timeSeriesChart2' width='200' height='100'></canvas>
+          <div class="btn-group btn-group-sm" role="group" aria-label="Basic example">
+            <button type="button" class="btn1 btn-outline-primary">Week</button>
+            <button type="button" class="btn1 btn-outline-primary active">Month</button>
+            <button type="button" class="btn1 btn-outline-primary">Year</button>
+          </div>
+         <canvas id='timeSeriesChart2' width='200' height='100'></canvas>
         </div>
         <br>
         <h4>Activity Summary</h4>
         <div id="account_activity">
+          <div class="btn-group btn-group-sm" role="group" aria-label="Basic example">
+            <button type="button" class="btn2 btn-outline-primary">Week</button>
+            <button type="button" class="btn2 btn-outline-primary active">Month</button>
+            <button type="button" class="btn2 btn-outline-primary">Year</button>
+          </div>
           <canvas id='timeSeriesChart3' width='200' height='100'></canvas>
         </div>
        </div>
@@ -83,20 +96,94 @@
 
       <script>
 
-  // MAIN
-  const ctx1 = document.getElementById('timeSeriesChart1').getContext('2d');
-  const ctx2 = document.getElementById('timeSeriesChart2').getContext('2d');
-  const ctx3 = document.getElementById('timeSeriesChart3').getContext('2d');
 
 
-  getDeepSleepStats(ctx1, "New Signups", "signup_activity", "newsignups", 0, 30);
-  getDeepSleepStats(ctx2, "User Syncs", "users_synced", "usersynced", 0, 30);
-  getDeepSleepStats(ctx3, "Activity", "account_activity", "active", 0, 30);
+
+
+   // MAIN
+    const ctxs = [];  // Array of contexts  objects
+    ctxs[0] = document.getElementById('timeSeriesChart1').getContext('2d');
+    ctxs[1] = document.getElementById('timeSeriesChart2').getContext('2d');
+    ctxs[2] = document.getElementById('timeSeriesChart3').getContext('2d');
+
+    const statsCharts = [];  // Array of stats chart objects
+    getDeepSleepStats(ctxs[0], 0, "New Signups", "signup_activity", "newsignups", 0, 30);
+    getDeepSleepStats(ctxs[1], 1, "User Syncs", "users_synced", "usersynced", 0, 30);        
+    getDeepSleepStats(ctxs[2], 2, "Activity", "account_activity", "active", 0, 30);
   
+    // Dynamic stuff
+    function setupButtonHandlers() {
+    const btnClick0 = function () {
+        this.parentNode.getElementsByClassName("active")[0].classList.remove("active");
+        this.classList.add("active");
+        console.log("Button press:" + this.innerHTML);
+        switch (this.innerHTML) {
+          case "Week" : console.log("Got WEEK"); 
+            statsCharts[0].destroy();
+            getDeepSleepStats(ctxs[0], 0, "New Signups", "signup_activity", "newsignups", 0, 7);
+            break;
+          case "Month" : console.log("Got MONTH"); 
+            statsCharts[0].destroy();
+            getDeepSleepStats(ctxs[0], 0, "New Signups", "signup_activity", "newsignups", 0, 30);
+            break;
+          case "Year" : console.log("Got YEAR"); 
+            statsCharts[0].destroy();
+            getDeepSleepStats(ctxs[0], 0, "New Signups", "signup_activity", "newsignups", 0, 120);
+            break;
+        }
+    };
+
+    const btnClick1 = function () {
+      this.parentNode.getElementsByClassName("active")[0].classList.remove("active");
+      this.classList.add("active");
+      console.log("Button press:" + this.innerHTML);
+      switch (this.innerHTML) {
+        case "Week" : console.log("Got WEEK"); 
+        statsCharts[1].destroy();
+        getDeepSleepStats(ctxs[1], 1, "User Syncs", "users_synced", "usersynced", 0, 7);        
+        break;
+      case "Month" : console.log("Got MONTH"); 
+        statsCharts[1].destroy();
+        getDeepSleepStats(ctxs[1], 1, "User Syncs", "users_synced", "usersynced", 0, 30);        
+        break;
+      case "Year" : console.log("Got YEAR"); 
+        statsCharts[1].destroy();
+        getDeepSleepStats(ctxs[1], 1, "User Syncs", "users_synced", "usersynced", 0, 120);        
+        break;
+      }
+    };
+
+    const btnClick2 = function () {
+      this.parentNode.getElementsByClassName("active")[0].classList.remove("active");
+      this.classList.add("active");
+      console.log("Button press:" + this.innerHTML);
+      switch (this.innerHTML) {
+        case "Week" : console.log("Got WEEK"); 
+        statsCharts[2].destroy();
+        getDeepSleepStats(ctxs[2], 2, "Activity", "account_activity", "active", 0, 7);
+        break;
+      case "Month" : console.log("Got MONTH"); 
+        statsCharts[2].destroy();
+        getDeepSleepStats(ctxs[2], 2, "Activity", "account_activity", "active", 0, 30);
+        break;
+      case "Year" : console.log("Got YEAR"); 
+        statsCharts[2].destroy();
+        getDeepSleepStats(ctxs[2], 2, "Activity", "account_activity", "active", 0, 120);
+        break;
+      }
+    };
+
+    document.querySelectorAll(".btn-group .btn0").forEach(btn => btn.addEventListener('click', btnClick0));
+    document.querySelectorAll(".btn-group .btn1").forEach(btn => btn.addEventListener('click', btnClick1));
+    document.querySelectorAll(".btn-group .btn2").forEach(btn => btn.addEventListener('click', btnClick2));
+
+  }
+  window.onload = setupButtonHandlers();
+
   
   // Creates a Chart.js chart in the CTX with the ChartName, with the labels, data and chart options
   function createChart(ctx, chartName, labelArr, dataArr, options) {
-   const chart1 = new Chart(ctx, {
+   const chart = new Chart(ctx, {
      type: 'line',
      data: {
        labels:  labelArr,
@@ -104,12 +191,14 @@
          label: chartName, 
          data: dataArr,
          borderWidth: 3, 
-         borderColor: 'rgb(128, 128, 255)',
+         borderColor: 'rgb(0, 0, 204)',
        }]
      },
      options: options,
    });
-  }
+   console.log("Created Chart in 'createChart':" + chart);
+   return(chart);
+  };
 
   // Plots the stats in a time-series graphy
   function plotStats(ctx, chartName, statsObj) {
@@ -149,8 +238,9 @@
     }
 
     // Finally, create the chart!
-
-    const c = createChart(ctx, chartName, labels, dataSet, options);
+    var c = createChart(ctx, chartName, labels, dataSet, options);
+    console.log("Created Chart in 'plotStats':" + c);
+    return(c);
   }
 
   // Draw text stats
@@ -163,14 +253,15 @@
     pageLoc.innerHTML = buf;
   }
 
-  function getDeepSleepStats(ctx, chartName, displayLoc, activityType, dayOffset, totalDays) {
+  function getDeepSleepStats(ctx, chartNum, chartName, displayLoc, activityType, dayOffset, totalDays) {
 
     fetch('https://sleepnet.appspot.com/api/admin/pacific/' + activityType + '/' + dayOffset + '/1/' + totalDays)
       .then(response => response.text())
       .then(responseData => {
         console.log(chartName +  "for Day Offset#" + dayOffset + "=" + responseData);
 //      drawTextStats(displayLoc, JSON.parse(responseData));
-        plotStats(ctx, chartName, JSON.parse(responseData));
+        statsCharts[chartNum] = plotStats(ctx, chartName, JSON.parse(responseData));
+        console.log("Created Chart in 'getDeepSleepStats':" + statsCharts[chartNum]);
       });
   }
 
