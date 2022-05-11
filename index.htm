@@ -72,7 +72,7 @@
 
         </div>
         <br>
-        <h4>User Sync Activity</h4>
+        <h4>Users per Day</h4>
         <div id="users_synced">
           <div class="btn-group btn-group-sm" role="group" aria-label="Basic example">
             <button type="button" class="btn1 btn-outline-primary">Week</button>
@@ -82,8 +82,8 @@
          <canvas id='timeSeriesChart2' width='200' height='100'></canvas>
         </div>
         <br>
-        <h4>Activity Summary</h4>
-        <div id="account_activity">
+        <h4>Activity per Day</h4>
+        <div id="countAppOpened">
           <div class="btn-group btn-group-sm" role="group" aria-label="Basic example">
             <button type="button" class="btn2 btn-outline-primary">Week</button>
             <button type="button" class="btn2 btn-outline-primary active">Month</button>
@@ -109,7 +109,7 @@
     const statsCharts = [];  // Array of stats chart objects
     getDeepSleepStats(ctxs[0], 0, "New Signups", "signup_activity", "newsignups", 0, 30);
     getDeepSleepStats(ctxs[1], 1, "User Syncs", "users_synced", "usersynced", 0, 30);        
-    getDeepSleepStats(ctxs[2], 2, "Activity", "account_activity", "active", 0, 30);
+    getDeepSleepStats(ctxs[2], 2, "Activity", "countAppOpened", "countAppOpened", 0, 30);
   
     // Dynamic stuff
     function setupButtonHandlers() {
