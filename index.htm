@@ -160,15 +160,15 @@
       switch (this.innerHTML) {
         case "Week" : console.log("Got WEEK"); 
         statsCharts[2].destroy();
-        getDeepSleepStats(ctxs[2], 2, "Activity", "account_activity", "active", 0, 7);
+        getDeepSleepStats(ctxs[2], 2, "Activity", "countAppOpened", "countAppOpened", 0, 7);
         break;
       case "Month" : console.log("Got MONTH"); 
         statsCharts[2].destroy();
-        getDeepSleepStats(ctxs[2], 2, "Activity", "account_activity", "active", 0, 30);
+        getDeepSleepStats(ctxs[2], 2, "Activity", "countAppOpened", "countAppOpened", 0, 30);
         break;
       case "Year" : console.log("Got YEAR"); 
         statsCharts[2].destroy();
-        getDeepSleepStats(ctxs[2], 2, "Activity", "account_activity", "active", 0, 120);
+        getDeepSleepStats(ctxs[2], 2, "Activity", "countAppOpened", "countAppOpened", 0, 120);
         break;
       }
     };
