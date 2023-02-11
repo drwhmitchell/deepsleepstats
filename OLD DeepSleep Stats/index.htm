@@ -1,0 +1,198 @@
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+ <!---   <link rel="icon" href="/docs/4.0/assets/img/favicons/favicon.ico">   -->
+
+    <title>BookLnk</title>
+
+    <link rel="canonical" href="https://getbootstrap.com/docs/4.0/examples/starter-template/">
+
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <!-- Custom styles for this template -->
+    <link href="starter-template.css" rel="stylesheet">
+
+  <!--  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>   -->
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment"></script>
+
+  </head>
+
+  <body>
+
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+      <a class="navbar-brand" href="#"><img src="dsstatslogo.png" style="width:22px;height:25px;"></a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item active">
+            <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Configure</a>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="http://example.com" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Data Views</a>
+            <div class="dropdown-menu" aria-labelledby="dropdown01">
+              <a class="dropdown-item" href="#">Weekly</a>
+              <a class="dropdown-item" href="#">Monthly</a>
+              <a class="dropdown-item" href="#">All-Time</a>
+            </div>
+          </li>
+        </ul>
+
+      </div>
+    </nav>
+
+    <main role="main" class="container">
+
+      <div class="starter-template">
+        <h1>DeepSleep App Site Stats</h1>
+        <p class="lead">Updated 5-7-22</p>
+      </div>
+      <div>
+        
+        <h4>Signup Summary</h4>
+        <div id="signup_activity">
+          <canvas id='timeSeriesChart1' width='200' height='100'></canvas>
+        </div>
+      </div>
+        <br>
+        <h4>User Sync Activity</h4>
+        <div id="users_synced">
+          <canvas id='timeSeriesChart2' width='200' height='100'></canvas>
+        </div>
+        <br>
+        <h4>Activity Summary</h4>
+        <div id="account_activity">
+          <canvas id='timeSeriesChart3' width='200' height='100'></canvas>
+        </div>
+       </div>
+
+
+      <script>
+
+  // MAIN
+  const ctx1 = document.getElementById('timeSeriesChart1').getContext('2d');
+  const ctx2 = document.getElementById('timeSeriesChart2').getContext('2d');
+  const ctx3 = document.getElementById('timeSeriesChart3').getContext('2d');
+
+
+  getDeepSleepStats(ctx1, "New Signups", "signup_activity", "newsignups", 0, 30);
+  getDeepSleepStats(ctx2, "User Syncs", "users_synced", "usersynced", 0, 30);
+  getDeepSleepStats(ctx3, "Activity", "account_activity", "active", 0, 30);
+  
+  
+  // Creates a Chart.js chart in the CTX with the ChartName, with the labels, data and chart options
+  function createChart(ctx, chartName, labelArr, dataArr, options) {
+   const chart1 = new Chart(ctx, {
+     type: 'line',
+     data: {
+       labels:  labelArr,
+       datasets: [{
+         label: chartName, 
+         data: dataArr,
+         borderWidth: 3, 
+         borderColor: 'rgb(128, 128, 255)',
+       }]
+     },
+     options: options,
+   });
+  }
+
+  // Plots the stats in a time-series graphy
+  function plotStats(ctx, chartName, statsObj) {
+      // create options
+    const options = {
+      scales: {
+        x: {
+          type: 'timeseries',
+          time: {
+            unit: 'day',  // <-- that does the trick here
+            displayFormats: {
+              day: 'M/DD'
+            },
+            tooltipFormat: 'MM/DD/YYYY'  // <-- same format for tooltip
+          }
+        },
+        y: {
+          min: 0
+        }
+      }
+    }
+
+    // create the dataset
+    const dataSet=[];
+    const len = statsObj.length;
+    for (i=0; i<len; i++) {
+      dataSet[len-1-i] = statsObj[i].value;   // reverse the values
+    }
+    // create the labels
+    const labels = [];
+    const numDays = statsObj.length;
+    const startDate = moment().subtract(numDays-1, 'days').format('MM/DD/YYYY');
+    for (let i = 0; i < numDays; i++) {
+      const date = moment(startDate).add(i, 'days').format('MM/DD/YYYY');
+      labels.push(date.toString());
+      console.log("Pushing date='" + date.toString() + "'");
+    }
+
+    // Finally, create the chart!
+
+    const c = createChart(ctx, chartName, labels, dataSet, options);
+  }
+
+  // Draw text stats
+  function drawTextStats(displayLoc, statsObj) {
+    var pageLoc = document.getElementById(displayLoc);
+    var buf = "";
+    for (i=0; i<statsObj.length; i++) {
+        buf += "Day" + i + "=" + statsObj[i].value + "<br>";
+    }
+    pageLoc.innerHTML = buf;
+  }
+
+  function getDeepSleepStats(ctx, chartName, displayLoc, activityType, dayOffset, totalDays) {
+
+    fetch('https://sleepnet.appspot.com/api/admin/pacific/' + activityType + '/' + dayOffset + '/1/' + totalDays)
+      .then(response => response.text())
+      .then(responseData => {
+        console.log(chartName +  "for Day Offset#" + dayOffset + "=" + responseData);
+//      drawTextStats(displayLoc, JSON.parse(responseData));
+        plotStats(ctx, chartName, JSON.parse(responseData));
+      });
+  }
+
+  </script>
+
+    </main><!-- /.container -->
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+
+  
+   <!--
+
+    <script src="sleepstudio.js"></script>
+    <script src="starter.js"></script>
+
+  --> 
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+  
+  </body>
+</html>
