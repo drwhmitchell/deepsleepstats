@@ -128,7 +128,7 @@
             break;
           case "Year" : console.log("Got YEAR"); 
             statsCharts[0].destroy();
-            getDeepSleepStats(ctxs[0], 0, "New Signups", "signup_activity", "newsignups", 0, 120);
+            getDeepSleepStats(ctxs[0], 0, "New Signups", "signup_activity", "newsignups", 0, 365);
             break;
         }
     };
@@ -148,7 +148,7 @@
         break;
       case "Year" : console.log("Got YEAR"); 
         statsCharts[1].destroy();
-        getDeepSleepStats(ctxs[1], 1, "User Syncs", "users_synced", "usersynced", 0, 120);        
+        getDeepSleepStats(ctxs[1], 1, "User Syncs", "users_synced", "usersynced", 0, 365);        
         break;
       }
     };
@@ -168,7 +168,7 @@
         break;
       case "Year" : console.log("Got YEAR"); 
         statsCharts[2].destroy();
-        getDeepSleepStats(ctxs[2], 2, "Activity", "countAppOpened", "countAppOpened", 0, 120);
+        getDeepSleepStats(ctxs[2], 2, "Activity", "countAppOpened", "countAppOpened", 0, 365);
         break;
       }
     };
@@ -224,6 +224,7 @@
     // create the dataset
     const dataSet=[];
     const len = statsObj.length;
+    console.log("Number of days/datapoints='" + len + "'");
     for (i=0; i<len; i++) {
       dataSet[len-1-i] = statsObj[i].value;   // reverse the values
     }
