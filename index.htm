@@ -10,10 +10,9 @@
 
     <title>DeepSleep Stats</title>
 
-    <link rel="canonical" href="https://getbootstrap.com/docs/4.0/examples/starter-template/">
 
     <!-- Bootstrap core CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.2.1/dist/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
 
     <!-- Custom styles for this template -->
     <link href="starter-template.css" rel="stylesheet">
@@ -28,263 +27,42 @@
 
   <body>
 
-    <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
-      <a class="navbar-brand" href="#"><img src="dsstatslogo.png" style="width:22px;height:25px;"></a>
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
+    <!-- HEADER -->
+    <div id="sleepstatsapp">
+      <nav class="navbar navbar-dark bg-dark justify-content-between fixed-top">
+        <a class="navbar-brand" href="#" style="display: flex; flex-direction: row; align-items: center;"><img src="dsstatslogo.png" style="width:22px;height:25px;"> <h2 style="display: inline; padding-left: 10px; margin:0px !important;">DeepSleep Site Stats</h2></a>
+        <form class="form-inline">
+          <button class="btn btn-danger btn-sm my-2 my-sm-0" type="submit">Logout</button>
+        </form>
+      </nav>
 
-      <div class="collapse navbar-collapse" id="navbarsExampleDefault">
-        <ul class="navbar-nav mr-auto">
-          <li class="nav-item active">
-            <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">Configure</a>
-          </li>
-          
-        </ul>
 
+      <!-- LOGGED IN CONTENT -->
+      <div class="container" v-if="loggedIn">
+        <div v-for="(stat, index) in stats">
+          <h4>{{stat.name}}</h4>
+          <div class="btn-group btn-group-sm" role="group" aria-label="Basic example" v-for="view in stat.views">
+            <button type="button" class="btn-outline-primary" :class="{'active': stat.selectedView == view}" v-on:click="updateStatView(index, view)">{{view.name}}</button>
+          </div>
+          <canvas class="area" :id='stat.canvasId' width='200' height='100'>
+
+          </canvas>
+            <br>
+        </div>
       </div>
-    </nav>
-
-
-
-    <main role="main" class="container">
-
-      <div class="starter-template">
-        <h1>DeepSleep Site Stats</h1>
-        <p class="lead">Updated 5/14/22</p>
-      </div>
-      <div>
-
-
-        
-        <h4>New Signup Summary</h4>
-        <div id="signup_activity">
-          <div class="btn-group btn-group-sm" role="group" aria-label="Basic example">
-            <button type="button" class="btn0 btn-outline-primary">Week</button>
-            <button type="button" class="btn0 btn-outline-primary active">Month</button>
-            <button type="button" class="btn0 btn-outline-primary">Year</button>
-          </div>
-          <canvas id='timeSeriesChart1' width='200' height='100'></canvas>
-        </div>
-
-        </div>
-        <br>
-        <h4>Active Users per Day</h4>
-        <div id="users_synced">
-          <div class="btn-group btn-group-sm" role="group" aria-label="Basic example">
-            <button type="button" class="btn1 btn-outline-primary">Week</button>
-            <button type="button" class="btn1 btn-outline-primary active">Month</button>
-            <button type="button" class="btn1 btn-outline-primary">Year</button>
-          </div>
-         <canvas id='timeSeriesChart2' width='200' height='100'></canvas>
-        </div>
-        <br>
-        <h4>Total Activity per Day</h4>
-        <div id="countAppOpened">
-          <div class="btn-group btn-group-sm" role="group" aria-label="Basic example">
-            <button type="button" class="btn2 btn-outline-primary">Week</button>
-            <button type="button" class="btn2 btn-outline-primary active">Month</button>
-            <button type="button" class="btn2 btn-outline-primary">Year</button>
-          </div>
-          <canvas id='timeSeriesChart3' width='200' height='100'></canvas>
-        </div>
-       </div>
-
-
-      <script>
-
-
-
-
-
-   // MAIN
-    const ctxs = [];  // Array of contexts  objects
-    ctxs[0] = document.getElementById('timeSeriesChart1').getContext('2d');
-    ctxs[1] = document.getElementById('timeSeriesChart2').getContext('2d');
-    ctxs[2] = document.getElementById('timeSeriesChart3').getContext('2d');
-
-    const statsCharts = [];  // Array of stats chart objects
-    getDeepSleepStats(ctxs[0], 0, "New Signups", "signup_activity", "newsignups", 0, 30);
-    getDeepSleepStats(ctxs[1], 1, "User Syncs", "users_synced", "usersynced", 0, 30);        
-    getDeepSleepStats(ctxs[2], 2, "Activity", "countAppOpened", "countAppOpened", 0, 30);
   
-    // Dynamic stuff
-    function setupButtonHandlers() {
-    const btnClick0 = function () {
-        this.parentNode.getElementsByClassName("active")[0].classList.remove("active");
-        this.classList.add("active");
-        console.log("Button press:" + this.innerHTML);
-        switch (this.innerHTML) {
-          case "Week" : console.log("Got WEEK"); 
-            statsCharts[0].destroy();
-            getDeepSleepStats(ctxs[0], 0, "New Signups", "signup_activity", "newsignups", 0, 7);
-            break;
-          case "Month" : console.log("Got MONTH"); 
-            statsCharts[0].destroy();
-            getDeepSleepStats(ctxs[0], 0, "New Signups", "signup_activity", "newsignups", 0, 30);
-            break;
-          case "Year" : console.log("Got YEAR"); 
-            statsCharts[0].destroy();
-            getDeepSleepStats(ctxs[0], 0, "New Signups", "signup_activity", "newsignups", 0, 365);
-            break;
-        }
-    };
-
-    const btnClick1 = function () {
-      this.parentNode.getElementsByClassName("active")[0].classList.remove("active");
-      this.classList.add("active");
-      console.log("Button press:" + this.innerHTML);
-      switch (this.innerHTML) {
-        case "Week" : console.log("Got WEEK"); 
-        statsCharts[1].destroy();
-        getDeepSleepStats(ctxs[1], 1, "User Syncs", "users_synced", "usersynced", 0, 7);        
-        break;
-      case "Month" : console.log("Got MONTH"); 
-        statsCharts[1].destroy();
-        getDeepSleepStats(ctxs[1], 1, "User Syncs", "users_synced", "usersynced", 0, 30);        
-        break;
-      case "Year" : console.log("Got YEAR"); 
-        statsCharts[1].destroy();
-        getDeepSleepStats(ctxs[1], 1, "User Syncs", "users_synced", "usersynced", 0, 365);        
-        break;
-      }
-    };
-
-    const btnClick2 = function () {
-      this.parentNode.getElementsByClassName("active")[0].classList.remove("active");
-      this.classList.add("active");
-      console.log("Button press:" + this.innerHTML);
-      switch (this.innerHTML) {
-        case "Week" : console.log("Got WEEK"); 
-        statsCharts[2].destroy();
-        getDeepSleepStats(ctxs[2], 2, "Activity", "countAppOpened", "countAppOpened", 0, 7);
-        break;
-      case "Month" : console.log("Got MONTH"); 
-        statsCharts[2].destroy();
-        getDeepSleepStats(ctxs[2], 2, "Activity", "countAppOpened", "countAppOpened", 0, 30);
-        break;
-      case "Year" : console.log("Got YEAR"); 
-        statsCharts[2].destroy();
-        getDeepSleepStats(ctxs[2], 2, "Activity", "countAppOpened", "countAppOpened", 0, 365);
-        break;
-      }
-    };
-
-    document.querySelectorAll(".btn-group .btn0").forEach(btn => btn.addEventListener('click', btnClick0));
-    document.querySelectorAll(".btn-group .btn1").forEach(btn => btn.addEventListener('click', btnClick1));
-    document.querySelectorAll(".btn-group .btn2").forEach(btn => btn.addEventListener('click', btnClick2));
-
-  }
-  window.onload = setupButtonHandlers();
-
   
-  // Creates a Chart.js chart in the CTX with the ChartName, with the labels, data and chart options
-  function createChart(ctx, chartName, labelArr, dataArr, options) {
-   const chart = new Chart(ctx, {
-     type: 'line',
-     data: {
-       labels:  labelArr,
-       datasets: [{
-         label: chartName, 
-         data: dataArr,
-         borderWidth: 3, 
-         borderColor: 'rgb(0, 0, 204)',
-       }]
-     },
-     options: options,
-   });
-   console.log("Created Chart in 'createChart':" + chart);
-   return(chart);
-  };
+    </div>
+  </div>
 
-  // Plots the stats in a time-series graphy
-  function plotStats(ctx, chartName, statsObj) {
-      // create options
-    const options = {
-      scales: {
-        x: {
-          type: 'timeseries',
-          time: {
-            unit: 'day',  // <-- that does the trick here
-            displayFormats: {
-              day: 'M/DD'
-            },
-            tooltipFormat: 'MM/DD/YYYY'  // <-- same format for tooltip
-          }
-        },
-        y: {
-          min: 0
-        }
-      }
-    }
 
-    // create the dataset
-    const dataSet=[];
-    const len = statsObj.length;
-    console.log("Number of days/datapoints='" + len + "'");
-    for (i=0; i<len; i++) {
-      dataSet[len-1-i] = statsObj[i].value;   // reverse the values
-    }
-    // create the labels
-    const labels = [];
-    const numDays = statsObj.length;
-    const startDate = moment().subtract(numDays-1, 'days').format('MM/DD/YYYY');
-    for (let i = 0; i < numDays; i++) {
-      const date = moment(startDate).add(i, 'days').format('MM/DD/YYYY');
-      labels.push(date.toString());
-      console.log("Pushing date='" + date.toString() + "'");
-    }
 
-    // Finally, create the chart!
-    var c = createChart(ctx, chartName, labels, dataSet, options);
-    console.log("Created Chart in 'plotStats':" + c);
-    return(c);
-  }
-
-  // Draw text stats
-  function drawTextStats(displayLoc, statsObj) {
-    var pageLoc = document.getElementById(displayLoc);
-    var buf = "";
-    for (i=0; i<statsObj.length; i++) {
-        buf += "Day" + i + "=" + statsObj[i].value + "<br>";
-    }
-    pageLoc.innerHTML = buf;
-  }
-
-  function getDeepSleepStats(ctx, chartNum, chartName, displayLoc, activityType, dayOffset, totalDays) {
-
-    fetch('https://sleepnet.appspot.com/api/admin/pacific/' + activityType + '/' + dayOffset + '/1/' + totalDays)
-      .then(response => response.text())
-      .then(responseData => {
-        console.log(chartName +  "for Day Offset#" + dayOffset + "=" + responseData);
-//      drawTextStats(displayLoc, JSON.parse(responseData));
-        statsCharts[chartNum] = plotStats(ctx, chartName, JSON.parse(responseData));
-        console.log("Created Chart in 'getDeepSleepStats':" + statsCharts[chartNum]);
-      });
-  }
-
-  </script>
-
-    </main><!-- /.container -->
-
-    <!-- Bootstrap core JavaScript
-    ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster -->
-
-  
-   <!--
-
-    <script src="sleepstudio.js"></script>
-    <script src="starter.js"></script>
-
-  --> 
-
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/vue@2"></script> -->
+      <script src="app.js"></script>
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.2.1/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
   
   </body>
 </html>
