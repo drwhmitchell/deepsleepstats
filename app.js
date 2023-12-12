@@ -56,25 +56,83 @@ const stats = [
 const sleepStatsApp = new Vue({
     el:'#sleepstatsapp',
     mounted(){
-        let index = 0;
-        this.stats.forEach(stat=>{
-          stat.ctx = document.getElementById(stat.canvasId).getContext('2d');
-          this.getDeepSleepStats(stat,index);
-          index++;
-        });
+        // if (getCookie('ds_auth')) {
+        //   this.ds_auth = JSON.parse(getCookie('ds_auth'));
+        //   setTimeout(()=>{
+        //     this.initStats();
+        //   }, 500);
+        // }
+        setTimeout(()=>{
+          this.initStats();
+        }, 500);
     },
     data(){
         return {
-            stats:stats
+            stats:stats,
+            ds_auth: null,
+            // Login stuff
+            login_error_msg: null,
+            login_params: {
+              data: {
+                email: null,
+                password: null
+              },
+              remember_me: false,
+              show_password: false
+            }
         }
     },
     methods:{
-       updateStatView(statIndex, view){
+      async login(){
+        var headers = new Headers();
+        headers.append("Content-Type", "application/json");
+        var requestOptions = {
+          method: 'POST',
+          headers: headers,
+          body: JSON.stringify(this.login_params.data),
+          redirect: 'follow'
+        };
+        let response = await makeApiCall("https://sleepnet.appspot.com/api/login", requestOptions);
+        if (response) {
+          if (response.result != 'success') {
+            this.login_error_msg = 'Login Failed: ' + response.message;
+          } else {
+            if (this.login_params.remember_me) {
+              setCookie("ds_auth", JSON.stringify(response));
+            } else {
+              eraseCookie("ds_auth");
+            }
+            this.ds_auth = response;
+            setTimeout(this.initStats, 500)
+          }
+        } else {
+          this.login_error_msg = 'Login Failed: Internal Server Error'
+        }
+      },
+      async logout() {
+        const callback = () => {
+          this.ds_auth = null;
+          eraseCookie("_SleepNetSession");
+          eraseCookie("ds_auth");
+          location.reload();
+        };
+        let result = await makeApiCall("https://sleepnet.appspot.com/api/logout", this.oldGetRequestOptions('DELETE'));
+        callback(result);
+      },
+      initStats(){
+        let index = 0;
+        this.stats.forEach(stat=>{
+          stat.ctx = document.getElementById(stat.canvasId).getContext('2d');
+          this.getDeepSleepStats(stat);
+          index++;
+        });
+      },
+       changeStatView(statIndex, view){
           let stat = this.stats[statIndex];
           stat.selectedView = view;
-          this.getDeepSleepStats(stat, statIndex);
+          this.getDeepSleepStats(stat);
        },
-       getDeepSleepStats(stat, statIndex) {
+       getDeepSleepStats(stat) {
         let dayOffset = 0;
         fetch(`https://sleepnet.appspot.com/api/admin/pacific/${stat.activityType}/${dayOffset}/1/${stat.selectedView.days}`)
           .then(response => response.text())
@@ -119,16 +177,39 @@ const sleepStatsApp = new Vue({
       }
     },
     computed:{
-      loggedIn(){
-        return true
+      isAuthorized() {
+        //return this.ds_auth;
+        return true;
       }
     }
 });
 
 
+async function makeApiCall(path, options) {
+  let response;
+  await fetch(path, options)
+    .then(res => res.json())
+    .then(dataBack => {
+      if (dataBack) {
+        response = dataBack;
+      }
+    });
+  return (response);
+}
   
+function getCookie(cookie_name) {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${cookie_name}=`);
+  if (parts.length === 2) return parts.pop().split(';').shift();
+};
 
+function eraseCookie(cookie_name) {
+  document.cookie = cookie_name + '=';
+};
 
+function setCookie(cookie_name, data) {
+  document.cookie = cookie_name + '=' + data;
+};
   
   
 
